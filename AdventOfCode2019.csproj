@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{8F3E98E3-3949-44D9-AA7A-57EF6A36FECC}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Adhoc</RootNamespace>
-    <AssemblyName>Adhoc</AssemblyName>
+    <RootNamespace>AdventOfCode2019</RootNamespace>
+    <AssemblyName>AdventOfCode2019</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

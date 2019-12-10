@@ -9,7 +9,7 @@ namespace Adhoc
 {
     class Day9
     {
-        static void Main(string[] args)
+        static void Main9(string[] args)
         {
             string inputProgram = File.ReadAllText(@".\Day9\input.txt");
             long[] instructionSet = inputProgram.Trim('\n').Split(',').Select((instr) => Int64.Parse(instr)).ToArray();

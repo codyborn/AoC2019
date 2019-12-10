@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Day10\Day10.cs" />
     <Compile Include="Day9\Day9.cs" />
     <Compile Include="Day8\Day8.cs" />
     <Compile Include="Day7\Day7.cs" />
@@ -59,6 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Day1\1.input.txt" />
+    <Content Include="Day10\input.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Day9\input.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

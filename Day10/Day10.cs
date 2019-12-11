@@ -9,7 +9,7 @@ namespace Adhoc
 {
     class Day10
     {
-        static void Main(string[] args)
+        static void Main10(string[] args)
         {
             string inputProgram = File.ReadAllText(@".\Day10\input.txt");
             char[][] astroidMap = inputProgram.Trim('\n').Split('\n').Select(line => line.ToCharArray()).ToArray();

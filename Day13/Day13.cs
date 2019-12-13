@@ -4,21 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Threading;
 
 namespace Adhoc
 {
-    class Day11
+    class Day13
     {
-        static void Main11(string[] args)
+        static void Main(string[] args)
         {
-            string inputProgram = File.ReadAllText(@".\Day11\input.txt");
+            string inputProgram = File.ReadAllText(@".\Day13\input.txt");
             long[] instructionSet = inputProgram.Trim('\n').Split(',').Select((instr) => Int64.Parse(instr)).ToArray();
             LargeMemSet memSet = new LargeMemSet(instructionSet);
-            PaintBot pb = new PaintBot();
-            ComputeIntCode(memSet, pb);
-
-            Console.WriteLine(pb.TotalPanelsPainted);
-            pb.printPainting();
+            var screen = new Screen();
+            ComputeIntCode(memSet, screen);
         }
 
         public class LargeMemSet
@@ -49,117 +47,67 @@ namespace Adhoc
             }
         }
 
-        public class PaintBot
+        public class Screen
         {
             Dictionary<Tuple<int, int>, int> craftPosToColor = new Dictionary<Tuple<int, int>, int>();
-            Tuple<int, int> currPos = new Tuple<int, int>(0, 0);
-            public int TotalPanelsPainted
-            {
-                get;
-                set;
-            }
-            // we'll just add this value when moving forward one space
-            // 0, -1 indicates add 0 to x axis and -1 to y axis (aka moving upward)
-            Tuple<int, int> currDirection = new Tuple<int, int>(0, -1);
+            private int score = 0;
+            private int currentPaddleX = 0;
+            private int currentBallX = 0;
+            private HashSet<Tuple<int, int>> blockPos = new HashSet<Tuple<int, int>>();
 
-            public PaintBot()
+            public void Write(int x, int y, int id)
             {
-                TotalPanelsPainted = 0;
-                craftPosToColor[currPos] = 1;
-            }
+                var tile = new Tuple<int, int>(x, y);
+                craftPosToColor[tile] = id;
 
-            public void printPainting()
-            {
-                // get ranges
-                int xMax = int.MinValue;
-                int yMax = int.MinValue;
-                int xMin = int.MaxValue;
-                int yMin = int.MaxValue;
-                foreach(Tuple<int, int> pos in craftPosToColor.Keys)
+                // Get position of ball and paddle to direct joystick
+                if (id == 3)
                 {
-                    xMax = Math.Max(xMax, pos.Item1);
-                    yMax = Math.Max(yMax, pos.Item2);
-                    yMin = Math.Min(yMin, pos.Item2);
-                    xMin = Math.Min(xMin, pos.Item1);
+                    currentPaddleX = x;
                 }
-                for (int x = xMax; x >= xMin; x--)
+                else if (id == 4)
                 {
-                    for (int y = yMin; y <= yMax; y++)
-                    {
-                        var currPos = new Tuple<int, int>(x, y);
-                        if (craftPosToColor.ContainsKey(currPos))
-                        {
-                            Console.Write(craftPosToColor[currPos] == 0 ? ' ' : '■');
-                        }
-                        else
-                        {
-                            Console.Write(' ');
-                        }
-                    }
-                    Console.Write('\n');
-                }
-            }
-
-            public int getCameraReading()
-            {
-                if (craftPosToColor.ContainsKey(currPos))
-                {
-                    return craftPosToColor[currPos];
+                    currentBallX = x;
                 }
 
-                // board starts black
-                return 0;
-            }
-
-            public void paint(int color)
-            {
-                if (!craftPosToColor.ContainsKey(currPos))
+                var potentialBlock = new Tuple<int, int>(x, y);
+                if (id == 2)
                 {
-                    TotalPanelsPainted++;
+                    blockPos.Add(potentialBlock);
                 }
-
-                craftPosToColor[currPos] = color;
-            }
-
-            public void changeDirectionAndMove(int direction)
-            {
-                // turn left
-                if (direction == 0)
-                {
-                    // if going left or right
-                    if (currDirection.Item2 == 0)
-                    {
-                        currDirection = new Tuple<int, int>(currDirection.Item2, currDirection.Item1 * -1);
-                    }
-                    else
-                    {
-                        currDirection = new Tuple<int, int>(currDirection.Item2, currDirection.Item1);
-                    }
-                }
-                // turn right
                 else
                 {
-                    // if going left or right
-                    if (currDirection.Item2 == 0)
+                    if (blockPos.Contains(potentialBlock))
                     {
-                        currDirection = new Tuple<int, int>(currDirection.Item2, currDirection.Item1);
-                    }
-                    else
-                    {
-                        currDirection = new Tuple<int, int>(currDirection.Item2 * -1, currDirection.Item1);
+                        blockPos.Remove(potentialBlock);
                     }
                 }
+                if (blockPos.Count == 0)
+                {
+                    // game over
+                    Console.WriteLine(score);
+                }
+            }
 
-                // Move
-                currPos = new Tuple<int, int>(currPos.Item1 + currDirection.Item1, currPos.Item2 + currDirection.Item2);
+            public int GetJoystickPos()
+            {
+                // 0 neutral
+                // -1 left
+                // 1 right
+                return currentBallX - currentPaddleX;
+            }
+
+            public void UpdateScore(int score)
+            {
+                this.score = score;
             }
         }
 
-        private static void ComputeIntCode(LargeMemSet instructionSet, PaintBot bot)
+        private static void ComputeIntCode(LargeMemSet instructionSet, Screen screen)
         {
             long activeInstruction = 0;
             long relativeBase = 0;
-            bool givenPaintInstr = false;
+            Queue<int> outputQueue = new Queue<int>();
             while (instructionSet[activeInstruction] != 99)
             {
                 long instruction = instructionSet[activeInstruction];
@@ -240,19 +188,21 @@ namespace Adhoc
                             activeInstruction += 4;
                         break;
                     case 3:
-                        instructionSet[firstParamIndex] = bot.getCameraReading();
+                        instructionSet[firstParamIndex] = screen.GetJoystickPos();
                         activeInstruction += 2;
                         break;
                     case 4:
-                        if (!givenPaintInstr)
+                        outputQueue.Enqueue((int)firstParamValue);
+                        if (outputQueue.Count == 3)
                         {
-                            bot.paint((int)firstParamValue);
-                            givenPaintInstr = true;
-                        }
-                        else
-                        {
-                            bot.changeDirectionAndMove((int)firstParamValue);
-                            givenPaintInstr = false;
+                            int x = outputQueue.Dequeue();
+                            int y = outputQueue.Dequeue();
+                            int id = outputQueue.Dequeue();
+                            if (x == -1 && y == 0)
+                            {
+                                screen.UpdateScore(id);
+                            }
+                            screen.Write(x, y, id);
                         }
                         activeInstruction += 2;
                         break;

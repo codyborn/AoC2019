@@ -78,12 +78,18 @@ namespace Adhoc
                     return steps;
                 }
                 // Calculate gravity effect on each body = O(n^2)
-                for (int bod1 = 0; bod1 < bods.Count - 1; bod1++)
+                // Calculate new state for x,y,z separately as they don't affect eachother
+                for (int i = 0; i < bods.First().xyz.Length; i++)
                 {
-                    for (int bod2 = bod1 + 1; bod2 < bods.Count; bod2++)
+                    SortedList<int, int> valueToIndex = new SortedList<int, int>();
+                    for (int bodIndex = 0; bodIndex < bods.Count; bodIndex++)
                     {
-                        bods[bod1].AccountForGravity(bods[bod2]);
-                        bods[bod2].AccountForGravity(bods[bod1]);
+                        valueToIndex.Add(bods[bodIndex].xyz[i], bodIndex);
+                    }
+                    for (int bodIndex = 0; bodIndex < valueToIndex.Count; bodIndex++)
+                    {
+                        int index = valueToIndex.ElementAt(bodIndex).Value;
+                        bods[index].xyz[i] += valueToIndex.Count - (bodIndex + 1);
                     }
                 }
 

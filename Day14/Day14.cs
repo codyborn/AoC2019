@@ -7,7 +7,7 @@ namespace Adhoc
 {
     class Day14
     {
-        static void Main(string[] args)
+        static void Main14(string[] args)
         {
             string inputProgram = File.ReadAllText(@".\Day14\input.txt");
             string[] elementMappingRaw = inputProgram.Trim('\n').Split('\n');

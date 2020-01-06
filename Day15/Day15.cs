@@ -10,7 +10,7 @@ namespace Adhoc
 {
     class Day15
     {
-        static void Main(string[] args)
+        static void Main15(string[] args)
         {
             string inputProgram = File.ReadAllText(@".\Day15\input.txt");
             long[] instructionSet = inputProgram.Trim('\n').Split(',').Select((instr) => Int64.Parse(instr)).ToArray();
@@ -89,8 +89,6 @@ namespace Adhoc
                         }
                         break;
                 }
-
-                PrintToScreen().Wait();
             }
 
             /// <summary>
@@ -135,6 +133,8 @@ namespace Adhoc
                 }
                 currentDirection = direction;
                 nextLocation = GetNextLocation(currentLocation, direction);
+
+                PrintToScreen().Wait();
                 return direction;
             }
 
